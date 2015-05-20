@@ -144,6 +144,7 @@ decodeByNameWith !opts = decodeWithP (csvWithHeader opts)
 data Quoting
     = QuoteNone        -- ^ No quotes
     | QuoteMinimal     -- ^ Quotes according to RFC 4180
+    | QuoteOld         -- ^ Quotes minimal, or when there are spaces in the field
     | QuoteAll         -- ^ Always quote
     deriving (Eq, Show)
 
@@ -184,7 +185,7 @@ defaultEncodeOptions = EncodeOptions
     { encDelimiter     = 44  -- comma
     , encUseCrLf       = True
     , encIncludeHeader = True
-    , encQuoting       = QuoteMinimal
+    , encQuoting       = QuoteOld
     }
 
 -- | Like 'encode', but lets you customize how the CSV data is
@@ -227,6 +228,8 @@ encodeRecord qtng delim = mconcat . intersperse (fromWord8 delim)
 escape :: Quoting -> Word8 -> B.ByteString -> B.ByteString
 escape !qtng !delim !s
     | (qtng == QuoteMinimal &&
+        B.any (\ b -> b == dquote || b == delim || b == nl || b == cr) s
+      ) || (qtng == QuoteOld &&
         B.any (\ b -> b == dquote || b == delim || b == nl || b == cr || b == sp) s
       ) || qtng == QuoteAll
          = toByteString $

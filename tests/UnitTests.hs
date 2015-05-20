@@ -144,6 +144,8 @@ positionalTests =
         [["1", "2"]] "1\t2\r\n"
       , testCase "newline" $ encodesWithAs (defEnc {encUseCrLf = False})
         [["1", "2"], ["3", "4"]] "1,2\n3,4\n"
+      , testCase "spaces" $ encodesWithAs (defEnc {encQuoting = QuoteMinimal})
+        [["a bc"]] "a bc\r\n"
       ]
     , testGroup "decode" $ map decodeTest decodeTests
     , testGroup "decodeWith" $ map decodeWithTest decodeWithTests
